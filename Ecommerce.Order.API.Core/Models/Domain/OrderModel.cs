@@ -7,12 +7,8 @@ namespace Ecommerce.Order.API.Core.Models.Domain
         [Key]
         public int Id { get; set; }
 
-        [Required]
-        public int ProductId { get; set; }
+        public bool Acitve { get; set; }
 
-        [Required]
-        public int Units { get; set; }
-
-        public ICollection<ProductModel> Products { get; set; }
+        public ICollection<OrderDetailModel> OrderDetails { get; set; }
     }
 }

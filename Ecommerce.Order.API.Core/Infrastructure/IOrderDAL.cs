@@ -4,12 +4,20 @@ namespace Ecommerce.Order.API.Core.Infrastructure
 {
     public interface IOrderDAL
     {
-        Task<IEnumerable<OrderModel>> GetAllOrders();
+        Task CreateOrder(OrderModel order);
+
+        Task<bool> InactiveOrder(OrderModel order);
 
         Task<OrderModel?> GetOrderById(int id);
 
         Task<bool> OrderExists(int id);
 
-        Task CreateOrder(OrderModel order);
+        Task<bool> CreateOrderDetail(OrderDetailModel orderDetail);
+
+        Task<bool> UpdateOrderDetail(OrderDetailModel orderDetail);
+
+        Task<bool> DeleteOrderDetail(OrderDetailModel orderDetail);
+
+        Task<OrderDetailModel?> GetOrderDetailById(int id);
     }
 }

@@ -20,12 +20,16 @@ namespace Ecommerce.Order.API.Application.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
-        public async Task<ActionResult> GetAllOrders()
+        [HttpPost]
+        public async Task<ActionResult> CreateOrder(OrderRequestModel requestModel)
         {
-            var orders = await _orderManager.GetAllOrders();
+            var order = _mapper.Map<OrderModel>(requestModel);
 
-            return Ok(_mapper.Map<IEnumerable<OrderResponseModel>>(orders));
+            await _orderManager.CreateOrder(order);
+
+            var response = _mapper.Map<OrderResponseModel>(order);
+
+            return CreatedAtAction("GetOrderById", new { Id = response.Id }, response);
         }
 
         [HttpGet("{id}")]
@@ -39,16 +43,85 @@ namespace Ecommerce.Order.API.Application.Controllers
             return Ok(_mapper.Map<OrderResponseModel>(order));
         }
 
-        [HttpPost]
-        public async Task<ActionResult> CreateProduct(OrderRequestModel requestModel)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrder(int id)
         {
-            var order = _mapper.Map<OrderModel>(requestModel);
+            try
+            {
+                var response = await _orderManager.InactiveOrder(id);
 
-            await _orderManager.CreateOrder(order);
+                return Ok(response);
+            }
+            catch (ArgumentException ae)
+            {
+                return Ok(ae.Message);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
 
-            var response = _mapper.Map<OrderResponseModel>(order);
+        [HttpPost]
+        [Route("CreateOrderDetail")]
+        public async Task<ActionResult> CreateOrderDetail(OrderDetailRequestModel requestModel)
+        {
+            try
+            {
+                var orderDetail = _mapper.Map<OrderDetailModel>(requestModel);
 
-            return CreatedAtAction("GetOrderById", new { Id = response.Id }, response);
+                var response = await _orderManager.CreateOrderDetail(orderDetail);
+
+                return Ok(response);
+            }
+            catch (ArgumentException ae)
+            {
+                return Ok(ae.Message);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPut]
+        [Route("UpdateOrderDetailUnits")]
+        public async Task<IActionResult> UpdateOrderDetailUnits(OrderDetailUpdateUnitsRequestModel requestModel)
+        {
+            try
+            {
+                bool response = await _orderManager.UpdateOrderDetailUnits(requestModel);
+
+                return Ok(response);
+            }
+            catch (ArgumentException ae)
+            {
+                return Ok(ae.Message);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpDelete]
+        [Route("DeleteOrderDetail/{id}")]
+        public async Task<IActionResult> DeleteOrderDetail(int id)
+        {
+            try
+            {
+                var response = await _orderManager.DeleteOrderDetail(id);
+
+                return Ok(response);
+            }
+            catch (ArgumentException ae)
+            {
+                return Ok(ae.Message);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
         }
     }
 }

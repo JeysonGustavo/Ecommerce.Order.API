@@ -22,6 +22,6 @@ namespace Ecommerce.Order.API.Core.Models.Domain
         [Required]
         public int MaxStockThreshold { get; set; }
 
-        public ICollection<OrderModel> Orders { get; set; }
+        public ICollection<OrderDetailModel> OrderDetails { get; set; }
     }
 }

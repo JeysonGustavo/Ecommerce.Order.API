@@ -12,6 +12,9 @@ namespace Ecommerce.Order.API.Application.Mapper
             CreateMap<OrderModel, OrderResponseModel>();
             CreateMap<OrderRequestModel, OrderModel>();
             CreateMap<ProductModel, ProductResponseModel>();
+
+            CreateMap<OrderDetailRequestModel, OrderDetailModel>();
+            CreateMap<OrderDetailModel, OrderDetailResponseModel>();
         }
     }
 }

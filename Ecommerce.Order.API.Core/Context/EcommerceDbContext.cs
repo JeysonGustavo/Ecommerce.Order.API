@@ -10,23 +10,35 @@ namespace Ecommerce.Order.API.Core.Context
         }
 
         public DbSet<OrderModel> Orders { get; set; }
-        //public DbSet<ProductModel> Products { get; set; }
+        public DbSet<ProductModel> Products { get; set; }
+        public DbSet<OrderDetailModel> OrderDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder
+               .Entity<ProductModel>()
+               .ToTable("Products");
+
             modelBuilder
                 .Entity<OrderModel>()
                 .ToTable("Orders");
 
             modelBuilder
-                .Entity<ProductModel>()
-                .ToTable("Products");
+                .Entity<OrderDetailModel>()
+                .ToTable("OrderDetails")
+                .HasKey(d => new { d.Id });
 
             modelBuilder
-                .Entity<OrderModel>()
-                .HasMany(o => o.Products)
-                .WithMany(c => c.Orders)
-                .UsingEntity(j => j.ToTable("ProductOrder"));
+                .Entity<OrderDetailModel>()
+                .HasOne(d => d.Order)
+                .WithMany(d => d.OrderDetails)
+                .HasForeignKey(d => d.OrderId);
+
+            modelBuilder
+                .Entity<OrderDetailModel>()
+                .HasOne(d => d.Product)
+                .WithMany(d => d.OrderDetails)
+                .HasForeignKey(d => d.ProductId);
 
             base.OnModelCreating(modelBuilder);
         }

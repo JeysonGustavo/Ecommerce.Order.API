@@ -1,10 +1,10 @@
-﻿namespace Ecommerce.Order.API.Core.Models.Response
+﻿using Ecommerce.Order.API.Core.Models.Domain;
+
+namespace Ecommerce.Order.API.Core.Models.Response
 {
     public class OrderResponseModel
     {
         public int Id { get; set; }
-        public int ProductId { get; set; }
-        public int Units { get; set; }
-        public ProductResponseModel Product { get; set; } = new ProductResponseModel();
+        public List<OrderDetailResponseModel> OrderDetails { get; set; } = new List<OrderDetailResponseModel>();
     }
 }

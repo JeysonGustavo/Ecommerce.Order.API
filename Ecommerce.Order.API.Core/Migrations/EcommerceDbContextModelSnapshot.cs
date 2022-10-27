@@ -21,6 +21,32 @@ namespace Ecommerce.Order.API.Core.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("Ecommerce.Order.API.Core.Models.Domain.OrderDetailModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Units")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderDetails", (string)null);
+                });
+
             modelBuilder.Entity("Ecommerce.Order.API.Core.Models.Domain.OrderModel", b =>
                 {
                     b.Property<int>("Id")
@@ -29,11 +55,8 @@ namespace Ecommerce.Order.API.Core.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Units")
-                        .HasColumnType("int");
+                    b.Property<bool>("Acitve")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -70,34 +93,33 @@ namespace Ecommerce.Order.API.Core.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("OrderModelProductModel", b =>
+            modelBuilder.Entity("Ecommerce.Order.API.Core.Models.Domain.OrderDetailModel", b =>
                 {
-                    b.Property<int>("OrdersId")
-                        .HasColumnType("int");
+                    b.HasOne("Ecommerce.Order.API.Core.Models.Domain.OrderModel", "Order")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<int>("ProductsId")
-                        .HasColumnType("int");
+                    b.HasOne("Ecommerce.Order.API.Core.Models.Domain.ProductModel", "Product")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasKey("OrdersId", "ProductsId");
+                    b.Navigation("Order");
 
-                    b.HasIndex("ProductsId");
-
-                    b.ToTable("ProductOrder", (string)null);
+                    b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("OrderModelProductModel", b =>
+            modelBuilder.Entity("Ecommerce.Order.API.Core.Models.Domain.OrderModel", b =>
                 {
-                    b.HasOne("Ecommerce.Order.API.Core.Models.Domain.OrderModel", null)
-                        .WithMany()
-                        .HasForeignKey("OrdersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("OrderDetails");
+                });
 
-                    b.HasOne("Ecommerce.Order.API.Core.Models.Domain.ProductModel", null)
-                        .WithMany()
-                        .HasForeignKey("ProductsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("Ecommerce.Order.API.Core.Models.Domain.ProductModel", b =>
+                {
+                    b.Navigation("OrderDetails");
                 });
 #pragma warning restore 612, 618
         }
