@@ -1,7 +1,9 @@
 using Ecommerce.Order.API.Core.Context;
 using Ecommerce.Order.API.Core.EventBus.Connection;
 using Ecommerce.Order.API.Core.EventBus.Publisher;
+using Ecommerce.Order.API.Core.EventBus.Subscriber;
 using Ecommerce.Order.API.Core.Infrastructure;
+using Ecommerce.Order.API.Core.Listener;
 using Ecommerce.Order.API.Core.Manager;
 using Ecommerce.Order.API.Infrastructure.DAL;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +28,12 @@ builder.Services.AddScoped<IOrderDAL, OrderDAL>();
 
 #region RabbitMQ
 builder.Services.AddSingleton<IConnectionProvider>(new ConnectionProvider(builder.Configuration["RabbitMQHost"], int.Parse(builder.Configuration["RabbitMQPort"])));
+builder.Services.AddSingleton<ISubscriber, Subscriber>(e => new Subscriber(e.GetService<IConnectionProvider>(), e.GetService<IServiceScopeFactory>(), "product", ExchangeType.Direct));
 builder.Services.AddSingleton<IPublisher, Publisher>(e => new Publisher(e.GetService<IConnectionProvider>(), "order_detail", ExchangeType.Direct));
+#endregion
+
+#region Listeners
+builder.Services.AddHostedService<ProductStockChangedListener>();
 #endregion
 
 #region Auto Mapper

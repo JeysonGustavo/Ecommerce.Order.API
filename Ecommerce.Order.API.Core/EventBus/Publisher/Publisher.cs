@@ -69,7 +69,7 @@ namespace Ecommerce.Order.API.Core.EventBus.Publisher
         public void PublishUpdateOrderDetailUnits(OrderDetailUpdateUnitsResponseModel updateOrderDetailUnits)
         {
             if (updateOrderDetailUnits is null)
-                throw new ArgumentException("Upda Order Detail Units cannot be null");
+                throw new ArgumentException("Update Order Detail Units cannot be null");
 
             var message = JsonSerializer.Serialize(updateOrderDetailUnits);
 
