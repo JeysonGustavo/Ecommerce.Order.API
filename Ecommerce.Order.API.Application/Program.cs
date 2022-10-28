@@ -1,8 +1,11 @@
 using Ecommerce.Order.API.Core.Context;
+using Ecommerce.Order.API.Core.EventBus.Connection;
+using Ecommerce.Order.API.Core.EventBus.Publisher;
 using Ecommerce.Order.API.Core.Infrastructure;
 using Ecommerce.Order.API.Core.Manager;
 using Ecommerce.Order.API.Infrastructure.DAL;
 using Microsoft.EntityFrameworkCore;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +16,9 @@ builder.Services.AddDbContext<EcommerceDbContext>(opt => opt.UseSqlServer(connec
 
 builder.Services.AddScoped<IOrderManager, OrderManager>();
 builder.Services.AddScoped<IOrderDAL, OrderDAL>();
+
+builder.Services.AddSingleton<IConnectionProvider>(new ConnectionProvider(builder.Configuration["RabbitMQHost"], int.Parse(builder.Configuration["RabbitMQPort"])));
+builder.Services.AddSingleton<IPublisher, Publisher>(e => new Publisher(e.GetService<IConnectionProvider>(), "order_detail", ExchangeType.Direct));
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

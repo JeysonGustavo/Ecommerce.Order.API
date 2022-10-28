@@ -12,6 +12,8 @@ namespace Ecommerce.Order.API.Core.Infrastructure
 
         Task<bool> OrderExists(int id);
 
+
+
         Task<bool> CreateOrderDetail(OrderDetailModel orderDetail);
 
         Task<bool> UpdateOrderDetail(OrderDetailModel orderDetail);
@@ -19,5 +21,7 @@ namespace Ecommerce.Order.API.Core.Infrastructure
         Task<bool> DeleteOrderDetail(OrderDetailModel orderDetail);
 
         Task<OrderDetailModel?> GetOrderDetailById(int id);
+
+        Task<bool> IsProductExistsForTheOrderDetail(int orderId, int productId);
     }
 }

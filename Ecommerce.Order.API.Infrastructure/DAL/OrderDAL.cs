@@ -144,5 +144,7 @@ namespace Ecommerce.Order.API.Infrastructure.DAL
         }
 
         public async Task<OrderDetailModel?> GetOrderDetailById(int id) => await _context.OrderDetails.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+        public async Task<bool> IsProductExistsForTheOrderDetail(int orderId, int productId) => await _context.OrderDetails.Where(x => x.OrderId == orderId && x.ProductId == productId).AnyAsync();
     }
 }

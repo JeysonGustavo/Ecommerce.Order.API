@@ -2,7 +2,7 @@
 {
     public class OrderDetailUpdateUnitsRequestModel
     {
-        public int OrderId { get; set; }
+        public int OrderDetailId { get; set; }
         public int Units { get; set; }
     }
 }

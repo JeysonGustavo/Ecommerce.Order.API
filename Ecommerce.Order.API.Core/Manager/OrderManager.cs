@@ -1,16 +1,23 @@
-﻿using Ecommerce.Order.API.Core.Infrastructure;
+﻿using AutoMapper;
+using Ecommerce.Order.API.Core.EventBus.Publisher;
+using Ecommerce.Order.API.Core.Infrastructure;
 using Ecommerce.Order.API.Core.Models.Domain;
 using Ecommerce.Order.API.Core.Models.Request;
+using Ecommerce.Order.API.Core.Models.Response;
 
 namespace Ecommerce.Order.API.Core.Manager
 {
     public class OrderManager : IOrderManager
     {
         private readonly IOrderDAL _orderDAL;
+        private readonly IPublisher _publisher;
+        private readonly IMapper _mapper;
 
-        public OrderManager(IOrderDAL orderDAL)
+        public OrderManager(IOrderDAL orderDAL, IPublisher publisher, IMapper mapper)
         {
             _orderDAL = orderDAL;
+            _publisher = publisher;
+            _mapper = mapper;
         }
 
         public async Task CreateOrder(OrderModel order)
@@ -41,7 +48,7 @@ namespace Ecommerce.Order.API.Core.Manager
 
             return order ?? new OrderModel();
         }
-       
+
         public async Task<bool> CreateOrderDetail(OrderDetailModel orderDetail)
         {
             if (orderDetail is null)
@@ -54,24 +61,41 @@ namespace Ecommerce.Order.API.Core.Manager
             if (order.Acitve is false)
                 throw new ArgumentException("Order is inactived");
 
-            return await _orderDAL.CreateOrderDetail(orderDetail);
+            if (await _orderDAL.IsProductExistsForTheOrderDetail(orderDetail.OrderId, orderDetail.ProductId) is true)
+                throw new ArgumentException("The Product is already on this order, change the Units");
+
+            bool response = await _orderDAL.CreateOrderDetail(orderDetail);
+
+            if (response is true)
+                _publisher.PublishNewOrderDetail(orderDetail);
+
+            return response;
         }
 
         public async Task<bool> UpdateOrderDetailUnits(OrderDetailUpdateUnitsRequestModel requestModel)
         {
-            if (requestModel.OrderId < 1)
+            if (requestModel.OrderDetailId < 1)
                 throw new ArgumentException("Id field is required");
 
             if (requestModel.Units < 1)
                 throw new ArgumentException("Unit field is required");
 
-            var orderDetail = await _orderDAL.GetOrderDetailById(requestModel.OrderId);
+            var orderDetail = await _orderDAL.GetOrderDetailById(requestModel.OrderDetailId);
             if (orderDetail is null)
                 throw new ArgumentException("Order Detail not found");
 
+            var updateOrderDetail = _mapper.Map<OrderDetailUpdateUnitsResponseModel>(orderDetail);
+            updateOrderDetail.OldUnits = orderDetail.Units;
+            updateOrderDetail.NewUnits = requestModel.Units;
+
             orderDetail.Units = requestModel.Units;
 
-            return await _orderDAL.UpdateOrderDetail(orderDetail);
+            bool response = await _orderDAL.UpdateOrderDetail(orderDetail);
+
+            if (response is true)
+                _publisher.PublishUpdateOrderDetailUnits(updateOrderDetail);
+
+            return response;
         }
 
         public async Task<bool> DeleteOrderDetail(int id)
