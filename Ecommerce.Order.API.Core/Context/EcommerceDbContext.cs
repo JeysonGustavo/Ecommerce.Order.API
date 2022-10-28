@@ -5,14 +5,19 @@ namespace Ecommerce.Order.API.Core.Context
 {
     public class EcommerceDbContext : DbContext
     {
+        #region Constructor
         public EcommerceDbContext(DbContextOptions<EcommerceDbContext> options) : base(options)
         {
         }
+        #endregion
 
+        #region DBSets
         public DbSet<OrderModel> Orders { get; set; }
         public DbSet<ProductModel> Products { get; set; }
         public DbSet<OrderDetailModel> OrderDetails { get; set; }
+        #endregion
 
+        #region OnModelCreating
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder
@@ -41,6 +46,7 @@ namespace Ecommerce.Order.API.Core.Context
                 .HasForeignKey(d => d.ProductId);
 
             base.OnModelCreating(modelBuilder);
-        }
+        } 
+        #endregion
     }
 }

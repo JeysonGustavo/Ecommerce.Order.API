@@ -9,17 +9,22 @@ namespace Ecommerce.Order.API.Core.Manager
 {
     public class OrderManager : IOrderManager
     {
+        #region Properties
         private readonly IOrderDAL _orderDAL;
         private readonly IPublisher _publisher;
         private readonly IMapper _mapper;
+        #endregion
 
+        #region Constructor
         public OrderManager(IOrderDAL orderDAL, IPublisher publisher, IMapper mapper)
         {
             _orderDAL = orderDAL;
             _publisher = publisher;
             _mapper = mapper;
         }
+        #endregion
 
+        #region CreateOrder
         public async Task CreateOrder(OrderModel order)
         {
             if (order is null)
@@ -29,7 +34,9 @@ namespace Ecommerce.Order.API.Core.Manager
 
             await _orderDAL.CreateOrder(order);
         }
+        #endregion
 
+        #region InactiveOrder
         public async Task<bool> InactiveOrder(int id)
         {
             if (id < 1)
@@ -41,14 +48,18 @@ namespace Ecommerce.Order.API.Core.Manager
 
             return await _orderDAL.InactiveOrder(order);
         }
+        #endregion
 
+        #region GetOrderById
         public async Task<OrderModel?> GetOrderById(int id)
         {
             var order = await _orderDAL.GetOrderById(id);
 
             return order ?? new OrderModel();
         }
+        #endregion
 
+        #region CreateOrderDetail
         public async Task<bool> CreateOrderDetail(OrderDetailModel orderDetail)
         {
             if (orderDetail is null)
@@ -71,7 +82,9 @@ namespace Ecommerce.Order.API.Core.Manager
 
             return response;
         }
+        #endregion
 
+        #region UpdateOrderDetailUnits
         public async Task<bool> UpdateOrderDetailUnits(OrderDetailUpdateUnitsRequestModel requestModel)
         {
             if (requestModel.OrderDetailId < 1)
@@ -97,7 +110,9 @@ namespace Ecommerce.Order.API.Core.Manager
 
             return response;
         }
+        #endregion
 
+        #region DeleteOrderDetail
         public async Task<bool> DeleteOrderDetail(int id)
         {
             if (id < 1)
@@ -108,6 +123,7 @@ namespace Ecommerce.Order.API.Core.Manager
                 throw new ArgumentException("Order Detail not found");
 
             return await _orderDAL.DeleteOrderDetail(orderDetail);
-        }
+        } 
+        #endregion
     }
 }

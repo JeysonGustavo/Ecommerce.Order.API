@@ -7,13 +7,18 @@ namespace Ecommerce.Order.API.Infrastructure.DAL
 {
     public class OrderDAL : IOrderDAL
     {
+        #region Properties
         private readonly EcommerceDbContext _context;
+        #endregion
 
+        #region Constructor
         public OrderDAL(EcommerceDbContext context)
         {
             _context = context;
         }
+        #endregion
 
+        #region CreateOrder
         public async Task CreateOrder(OrderModel order)
         {
             using var transaction = _context.Database.BeginTransaction();
@@ -33,7 +38,9 @@ namespace Ecommerce.Order.API.Infrastructure.DAL
                 transaction.Rollback();
             }
         }
+        #endregion
 
+        #region InactiveOrder
         public async Task<bool> InactiveOrder(OrderModel order)
         {
             using var transaction = _context.Database.BeginTransaction();
@@ -62,11 +69,17 @@ namespace Ecommerce.Order.API.Infrastructure.DAL
                 return false;
             }
         }
+        #endregion
 
+        #region GetOrderById
         public async Task<OrderModel?> GetOrderById(int id) => await _context.Orders.Include(x => x.OrderDetails).Include("OrderDetails.Product").OrderBy(x => x.Id).Where(x => x.Id == id).FirstOrDefaultAsync();
+        #endregion
 
+        #region OrderExists
         public async Task<bool> OrderExists(int id) => await _context.Orders.Where(x => x.Id == id).AnyAsync();
+        #endregion
 
+        #region CreateOrderDetail
         public async Task<bool> CreateOrderDetail(OrderDetailModel orderDetail)
         {
             using var transaction = _context.Database.BeginTransaction();
@@ -93,7 +106,9 @@ namespace Ecommerce.Order.API.Infrastructure.DAL
                 return false;
             }
         }
+        #endregion
 
+        #region UpdateOrderDetail
         public async Task<bool> UpdateOrderDetail(OrderDetailModel orderDetail)
         {
             using var transaction = _context.Database.BeginTransaction();
@@ -118,7 +133,9 @@ namespace Ecommerce.Order.API.Infrastructure.DAL
                 return false;
             }
         }
+        #endregion
 
+        #region DeleteOrderDetail
         public async Task<bool> DeleteOrderDetail(OrderDetailModel orderDetail)
         {
             using var transaction = _context.Database.BeginTransaction();
@@ -142,9 +159,14 @@ namespace Ecommerce.Order.API.Infrastructure.DAL
                 return false;
             }
         }
+        #endregion
 
+        #region GetOrderDetailById
         public async Task<OrderDetailModel?> GetOrderDetailById(int id) => await _context.OrderDetails.Where(x => x.Id == id).FirstOrDefaultAsync();
+        #endregion
 
-        public async Task<bool> IsProductExistsForTheOrderDetail(int orderId, int productId) => await _context.OrderDetails.Where(x => x.OrderId == orderId && x.ProductId == productId).AnyAsync();
+        #region IsProductExistsForTheOrderDetail
+        public async Task<bool> IsProductExistsForTheOrderDetail(int orderId, int productId) => await _context.OrderDetails.Where(x => x.OrderId == orderId && x.ProductId == productId).AnyAsync(); 
+        #endregion
     }
 }

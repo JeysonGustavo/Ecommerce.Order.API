@@ -11,15 +11,20 @@ namespace Ecommerce.Order.API.Application.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
+        #region Properties
         private readonly IOrderManager _orderManager;
         private readonly IMapper _mapper;
+        #endregion
 
+        #region Constructor
         public OrderController(IOrderManager orderManager, IMapper mapper)
         {
             _orderManager = orderManager;
             _mapper = mapper;
         }
+        #endregion
 
+        #region CreateOrder
         [HttpPost]
         public async Task<ActionResult> CreateOrder(OrderRequestModel requestModel)
         {
@@ -31,7 +36,9 @@ namespace Ecommerce.Order.API.Application.Controllers
 
             return CreatedAtAction("GetOrderById", new { Id = response.Id }, response);
         }
+        #endregion
 
+        #region GetOrderById
         [HttpGet("{id}")]
         public async Task<ActionResult> GetOrderById(int id)
         {
@@ -42,7 +49,9 @@ namespace Ecommerce.Order.API.Application.Controllers
 
             return Ok(_mapper.Map<OrderResponseModel>(order));
         }
+        #endregion
 
+        #region DeleteOrder
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
@@ -61,7 +70,9 @@ namespace Ecommerce.Order.API.Application.Controllers
                 return NotFound();
             }
         }
+        #endregion
 
+        #region CreateOrderDetail
         [HttpPost]
         [Route("CreateOrderDetail")]
         public async Task<ActionResult> CreateOrderDetail(OrderDetailRequestModel requestModel)
@@ -83,7 +94,9 @@ namespace Ecommerce.Order.API.Application.Controllers
                 return NotFound();
             }
         }
+        #endregion
 
+        #region UpdateOrderDetailUnits
         [HttpPut]
         [Route("UpdateOrderDetailUnits")]
         public async Task<IActionResult> UpdateOrderDetailUnits(OrderDetailUpdateUnitsRequestModel requestModel)
@@ -103,7 +116,9 @@ namespace Ecommerce.Order.API.Application.Controllers
                 return NotFound();
             }
         }
+        #endregion
 
+        #region DeleteOrderDetail
         [HttpDelete]
         [Route("DeleteOrderDetail/{id}")]
         public async Task<IActionResult> DeleteOrderDetail(int id)
@@ -122,6 +137,7 @@ namespace Ecommerce.Order.API.Application.Controllers
             {
                 return NotFound();
             }
-        }
+        } 
+        #endregion
     }
 }

@@ -9,13 +9,17 @@ namespace Ecommerce.Order.API.Application.Mapper
     {
         public MappingProfile()
         {
-            CreateMap<OrderModel, OrderResponseModel>();
+            #region Request
             CreateMap<OrderRequestModel, OrderModel>();
-            CreateMap<ProductModel, ProductResponseModel>();
-
             CreateMap<OrderDetailRequestModel, OrderDetailModel>();
+            #endregion
+
+            #region Response
+            CreateMap<OrderModel, OrderResponseModel>();
+            CreateMap<ProductModel, ProductResponseModel>();
             CreateMap<OrderDetailModel, OrderDetailResponseModel>();
             CreateMap<OrderDetailModel, OrderDetailUpdateUnitsResponseModel>();
+            #endregion
         }
     }
 }
