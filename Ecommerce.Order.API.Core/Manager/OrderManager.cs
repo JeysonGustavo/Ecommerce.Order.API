@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Ecommerce.Order.API.Core.EventBus.Publisher;
 using Ecommerce.Order.API.Core.Infrastructure;
+using Ecommerce.Order.API.Core.Kafka.Publisher;
 using Ecommerce.Order.API.Core.Models.Domain;
 using Ecommerce.Order.API.Core.Models.Request;
 using Ecommerce.Order.API.Core.Models.Response;
@@ -13,14 +14,16 @@ namespace Ecommerce.Order.API.Core.Manager
         private readonly IOrderDAL _orderDAL;
         private readonly IPublisher _publisher;
         private readonly IMapper _mapper;
+        private readonly IKafkaProducer _kafkaProducer;
         #endregion
 
         #region Constructor
-        public OrderManager(IOrderDAL orderDAL, IPublisher publisher, IMapper mapper)
+        public OrderManager(IOrderDAL orderDAL, IPublisher publisher, IMapper mapper, IKafkaProducer kafkaProducer)
         {
             _orderDAL = orderDAL;
             _publisher = publisher;
             _mapper = mapper;
+            _kafkaProducer = kafkaProducer;
         }
         #endregion
 
@@ -75,10 +78,17 @@ namespace Ecommerce.Order.API.Core.Manager
             if (await _orderDAL.IsProductExistsForTheOrderDetail(orderDetail.OrderId, orderDetail.ProductId) is true)
                 throw new ArgumentException("The Product is already on this order, change the Units");
 
+            
             bool response = await _orderDAL.CreateOrderDetail(orderDetail);
 
             if (response is true)
-                _publisher.PublishNewOrderDetail(orderDetail);
+            {
+                // RabbitMQ
+                //_publisher.PublishNewOrderDetail(orderDetail);
+
+                // Kafka
+                await _kafkaProducer.PublishNewOrderDetail(orderDetail);
+            }
 
             return response;
         }
