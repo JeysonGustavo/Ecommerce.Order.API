@@ -122,7 +122,12 @@ namespace Ecommerce.Order.API.Core.Manager
             if (orderDetail is null)
                 throw new ArgumentException("Order Detail not found");
 
-            return await _orderDAL.DeleteOrderDetail(orderDetail);
+            bool response = await _orderDAL.DeleteOrderDetail(orderDetail);
+
+            if (response is true)
+                _publisher.PublishDeletedOrderDetail(orderDetail);
+
+            return response;
         } 
         #endregion
     }

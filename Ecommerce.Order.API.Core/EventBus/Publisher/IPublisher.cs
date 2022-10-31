@@ -8,5 +8,7 @@ namespace Ecommerce.Order.API.Core.EventBus.Publisher
         void PublishNewOrderDetail(OrderDetailModel orderDetail);
 
         void PublishUpdateOrderDetailUnits(OrderDetailUpdateUnitsResponseModel updateOrderDetailUnits);
+
+        void PublishDeletedOrderDetail(OrderDetailModel orderDetail);
     }
 }

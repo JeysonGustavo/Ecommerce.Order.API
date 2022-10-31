@@ -78,6 +78,19 @@ namespace Ecommerce.Order.API.Core.EventBus.Publisher
         }
         #endregion
 
+        #region PublishDeletedOrderDetail
+        public void PublishDeletedOrderDetail(OrderDetailModel orderDetail)
+        {
+            if (orderDetail is null)
+                throw new ArgumentException("New Order Detail cannot be null");
+
+            var message = JsonSerializer.Serialize(orderDetail);
+
+            if (_connectionProvider.GetConnection().IsOpen)
+                SendMessage(message, "order_detail_deleted");
+        } 
+        #endregion
+
         #region Dispose
         public void Dispose()
         {

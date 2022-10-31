@@ -47,6 +47,7 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
         {
             SubscriberProductStockChangedOrderDetailCreated();
             SubscriberProductStockChangedOrderDetailUpdated();
+            SubscriberProductStockChangedOrderDetailDeleted();
         }
         #endregion
 
@@ -109,15 +110,6 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
                         throw new ArgumentException("Could not receive the message from Product service");
 
                     _context.OrderDetails.Remove(orderDetail);
-
-                    var product = _context.Products.Where(x => x.Id == productMessage.ProductId).FirstOrDefault();
-
-                    if (product is null)
-                        throw new ArgumentException("Could not receive the message from Product service");
-
-                    product.AvailableStock += productMessage.Units;
-                    _context.Entry(product).State = EntityState.Modified;
-
                     _context.SaveChanges();
                 }
             }
@@ -142,12 +134,76 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
         #endregion
 
         #region ProductStockChangedOrderDetailUpdatedMessageReceived
-        private void ProductStockChangedOrderDetailUpdatedMessageReceived(object? sender, BasicDeliverEventArgs e)
+        private void ProductStockChangedOrderDetailUpdatedMessageReceived(object? sender, BasicDeliverEventArgs args)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var message = GetMessage(args);
+
+                var productMessage = JsonSerializer.Deserialize<ProductMessageResponseModel>(message);
+
+                if (productMessage is null)
+                    throw new ArgumentException("Could not receive the message from Product service");
+
+                if (productMessage.IsSuccess is false)
+                {
+                    var orderDetail = _context.OrderDetails.Where(x => x.OrderId == productMessage.OrderId && x.ProductId == productMessage.ProductId).FirstOrDefault();
+
+                    if (orderDetail is null)
+                        throw new ArgumentException("Could not receive the message from Product service");
+
+                    orderDetail.Units = productMessage.Units;
+                    _context.Entry(orderDetail).State = EntityState.Modified;
+                    _context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Exception receiving product stock changed for order updated message, Error: {ex.Message}");
+            }
         }
         #endregion
 
+        #region SubscriberProductStockChangedOrderDetailDeleted
+        private void SubscriberProductStockChangedOrderDetailDeleted()
+        {
+            var queueName = _channel.QueueDeclare().QueueName;
+            _channel.QueueBind(queueName, _exchange, "product_stock_changed_order_detail_deleted");
+
+            var consumer = new EventingBasicConsumer(_channel);
+            consumer.Received += ProductStockChangedOrderDetailDeletedMessageReceived;
+
+            _channel.BasicConsume(queueName, true, consumer);
+        }
+        #endregion
+
+        #region ProductStockChangedOrderDetailDeletedMessageReceived
+        private void ProductStockChangedOrderDetailDeletedMessageReceived(object? sender, BasicDeliverEventArgs args)
+        {
+            try
+            {
+                var message = GetMessage(args);
+
+                var productMessage = JsonSerializer.Deserialize<ProductMessageResponseModel>(message);
+
+                if (productMessage is null)
+                    throw new ArgumentException("Could not receive the message from Product service");
+
+                if (productMessage.IsSuccess is false)
+                {
+                    Console.WriteLine($"--> Product Available Stock was not changed; Product Id: {productMessage.ProductId}; Order Id: {productMessage.OrderId}; Qtde: {productMessage.Units}");
+
+                    var orderDetail = new OrderDetailModel { OrderId = productMessage.OrderId, ProductId = productMessage.ProductId, Units = productMessage.Units };
+                    _context.OrderDetails.Add(orderDetail);
+                    _context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Exception receiving product stock changed for order deleted message, Error: {ex.Message}");
+            }
+        } 
+        #endregion
 
         #region Dispose
         public void Dispose()
