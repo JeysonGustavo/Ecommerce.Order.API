@@ -15,7 +15,6 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
     public class Subscriber : ISubscriber, IDisposable
     {
         #region Properties
-        private readonly IPublisher _publisher;
         private readonly IConnectionProvider _connectionProvider;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly EcommerceDbContext _context;
@@ -32,7 +31,6 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
             _scope = _scopeFactory.CreateScope();
 
             _connectionProvider = connectionProvider;
-            _publisher = _scope.ServiceProvider.GetRequiredService<IPublisher>();
             _context = _scope.ServiceProvider.GetRequiredService<EcommerceDbContext>();
             _exchange = exchange;
             _exchangeType = exchangeType;

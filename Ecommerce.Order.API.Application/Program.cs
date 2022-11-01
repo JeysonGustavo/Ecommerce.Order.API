@@ -5,6 +5,7 @@ using Ecommerce.Order.API.Core.EventBus.Publisher;
 using Ecommerce.Order.API.Core.EventBus.Subscriber;
 using Ecommerce.Order.API.Core.Infrastructure;
 using Ecommerce.Order.API.Core.Kafka.Connection;
+using Ecommerce.Order.API.Core.Kafka.Consumer;
 using Ecommerce.Order.API.Core.Kafka.Publisher;
 using Ecommerce.Order.API.Core.Listener;
 using Ecommerce.Order.API.Core.Manager;
@@ -42,10 +43,10 @@ builder.Services.AddHostedService<ProductStockChangedListener>();
 
 #region Kafka
 builder.Services.AddSingleton<ProducerConfig>(new ProducerConfig { BootstrapServers = builder.Configuration["KafkaServer"] });
-builder.Services.AddSingleton<ConsumerConfig>(new ConsumerConfig { BootstrapServers = builder.Configuration["KafkaServer"], GroupId = "ecommerce_product_consumer", AutoOffsetReset = AutoOffsetReset.Earliest });
+builder.Services.AddSingleton<ConsumerConfig>(new ConsumerConfig { BootstrapServers = builder.Configuration["KafkaServer"], GroupId = "ecommerce_order_consumer", AutoOffsetReset = AutoOffsetReset.Earliest });
 builder.Services.AddSingleton<IKafkaConnectionProvider, KafkaConnectionProvider>();
 builder.Services.AddSingleton<IKafkaProducer, KafkaProducer>();
-//builder.Services.AddSingleton<IKafkaConsumer, KafkaConsumer>();
+builder.Services.AddSingleton<IKafkaConsumer, KafkaConsumer>();
 #endregion
 
 #region Auto Mapper

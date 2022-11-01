@@ -116,7 +116,13 @@ namespace Ecommerce.Order.API.Core.Manager
             bool response = await _orderDAL.UpdateOrderDetail(orderDetail);
 
             if (response is true)
-                _publisher.PublishUpdateOrderDetailUnits(updateOrderDetail);
+            {
+                // RabbitMQ
+                //_publisher.PublishUpdateOrderDetailUnits(updateOrderDetail);
+
+                // Kafka
+                await _kafkaProducer.PublishUpdateOrderDetailUnits(updateOrderDetail);
+            }
 
             return response;
         }
@@ -135,7 +141,13 @@ namespace Ecommerce.Order.API.Core.Manager
             bool response = await _orderDAL.DeleteOrderDetail(orderDetail);
 
             if (response is true)
-                _publisher.PublishDeletedOrderDetail(orderDetail);
+            {
+                // RabbitMQ
+                //_publisher.PublishDeletedOrderDetail(orderDetail);
+
+                // Kafka
+                await _kafkaProducer.PublishDeletedOrderDetail(orderDetail);
+            }                
 
             return response;
         } 

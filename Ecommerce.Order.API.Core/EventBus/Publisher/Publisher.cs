@@ -82,7 +82,7 @@ namespace Ecommerce.Order.API.Core.EventBus.Publisher
         public void PublishDeletedOrderDetail(OrderDetailModel orderDetail)
         {
             if (orderDetail is null)
-                throw new ArgumentException("New Order Detail cannot be null");
+                throw new ArgumentException("Order Detail cannot be null");
 
             var message = JsonSerializer.Serialize(orderDetail);
 
