@@ -84,10 +84,10 @@ namespace Ecommerce.Order.API.Core.Manager
             if (response is true)
             {
                 // RabbitMQ
-                //_publisher.PublishNewOrderDetail(orderDetail);
+                _publisher.PublishNewOrderDetail(orderDetail);
 
                 // Kafka
-                await _kafkaProducer.PublishNewOrderDetail(orderDetail);
+                //await _kafkaProducer.PublishNewOrderDetail(orderDetail);
             }
 
             return response;
@@ -118,10 +118,10 @@ namespace Ecommerce.Order.API.Core.Manager
             if (response is true)
             {
                 // RabbitMQ
-                //_publisher.PublishUpdateOrderDetailUnits(updateOrderDetail);
+                _publisher.PublishUpdateOrderDetailUnits(updateOrderDetail);
 
                 // Kafka
-                await _kafkaProducer.PublishUpdateOrderDetailUnits(updateOrderDetail);
+                //await _kafkaProducer.PublishUpdateOrderDetailUnits(updateOrderDetail);
             }
 
             return response;
@@ -143,10 +143,10 @@ namespace Ecommerce.Order.API.Core.Manager
             if (response is true)
             {
                 // RabbitMQ
-                //_publisher.PublishDeletedOrderDetail(orderDetail);
+                _publisher.PublishDeletedOrderDetail(orderDetail);
 
                 // Kafka
-                await _kafkaProducer.PublishDeletedOrderDetail(orderDetail);
+                //await _kafkaProducer.PublishDeletedOrderDetail(orderDetail);
             }                
 
             return response;

@@ -4,7 +4,6 @@ using Ecommerce.Order.API.Core.Models.Domain;
 using Ecommerce.Order.API.Core.Models.Response;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using RabbitMQ.Client.Events;
 using System.Text.Json;
 
 namespace Ecommerce.Order.API.Core.Kafka.Consumer
@@ -42,6 +41,7 @@ namespace Ecommerce.Order.API.Core.Kafka.Consumer
         }
         #endregion
 
+        #region SubscribeTopics
         private async void SubscribeTopics(List<string> topics)
         {
             await Task.Run(() =>
@@ -82,7 +82,8 @@ namespace Ecommerce.Order.API.Core.Kafka.Consumer
                     }
                 }
             });
-        }
+        } 
+        #endregion
 
         #region ProductStockChangedOrderDetailCreatedMessageReceived
         private async void ProductStockChangedOrderDetailCreatedMessageReceived(string message)
@@ -101,6 +102,7 @@ namespace Ecommerce.Order.API.Core.Kafka.Consumer
                     if (orderDetail is null)
                         throw new ArgumentException("Could not receive the message from Product service");
 
+                    //throw new Exception();
                     _context.OrderDetails.Remove(orderDetail);
                     await _context.SaveChangesAsync();
                 }

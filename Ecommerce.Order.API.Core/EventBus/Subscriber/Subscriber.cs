@@ -1,6 +1,5 @@
 ﻿using Ecommerce.Order.API.Core.Context;
 using Ecommerce.Order.API.Core.EventBus.Connection;
-using Ecommerce.Order.API.Core.EventBus.Publisher;
 using Ecommerce.Order.API.Core.Models.Domain;
 using Ecommerce.Order.API.Core.Models.Response;
 using Microsoft.EntityFrameworkCore;
