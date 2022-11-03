@@ -60,5 +60,13 @@ namespace Ecommerce.Order.API.Core.Kafka.Publisher
             _kafkaConnectionProvider.GetProducer().Flush();
         }
         #endregion
+
+        public async Task PublishDeadLetterMessage(string key, string message)
+        {
+
+            await _kafkaConnectionProvider.GetProducerWithKey().ProduceAsync("kafka_kafka_dead_messages_to_monitore", new Message<string, string> { Key = key, Value = message });
+
+            _kafkaConnectionProvider.GetProducer().Flush();
+        }
     }
 }

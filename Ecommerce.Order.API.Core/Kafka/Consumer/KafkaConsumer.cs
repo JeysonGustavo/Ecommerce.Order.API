@@ -1,5 +1,6 @@
 ﻿using Ecommerce.Order.API.Core.Context;
 using Ecommerce.Order.API.Core.Kafka.Connection;
+using Ecommerce.Order.API.Core.Kafka.Publisher;
 using Ecommerce.Order.API.Core.Models.Domain;
 using Ecommerce.Order.API.Core.Models.Response;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ namespace Ecommerce.Order.API.Core.Kafka.Consumer
     public class KafkaConsumer : IKafkaConsumer
     {
         #region Properties
+        private readonly IKafkaProducer _kafkaProducer;
         private readonly IKafkaConnectionProvider _kafkaConnectionProvider;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IServiceScope _scope;
@@ -19,13 +21,14 @@ namespace Ecommerce.Order.API.Core.Kafka.Consumer
         #endregion
 
         #region Constructor
-        public KafkaConsumer(IKafkaConnectionProvider kafkaConnectionProvider, IServiceScopeFactory scopeFactory)
+        public KafkaConsumer(IKafkaConnectionProvider kafkaConnectionProvider, IServiceScopeFactory scopeFactory, IKafkaProducer kafkaProducer)
         {
             _kafkaConnectionProvider = kafkaConnectionProvider;
 
             _scopeFactory = scopeFactory;
             _scope = _scopeFactory.CreateScope();
             _context = _scope.ServiceProvider.GetRequiredService<EcommerceDbContext>();
+            _kafkaProducer = kafkaProducer;
         }
         #endregion
 
@@ -109,6 +112,7 @@ namespace Ecommerce.Order.API.Core.Kafka.Consumer
             }
             catch (Exception ex)
             {
+                await _kafkaProducer.PublishDeadLetterMessage("dead_order_detail_created", message);
                 Console.WriteLine($"--> Exception receiving product stock changed for order created message, Error: {ex.Message}");
             }
         }
@@ -132,6 +136,7 @@ namespace Ecommerce.Order.API.Core.Kafka.Consumer
                         throw new ArgumentException("Could not receive the message from Product service");
 
                     orderDetail.Units = productMessage.Units;
+                    //throw new Exception();
                     _context.Entry(orderDetail).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                 }
@@ -156,6 +161,7 @@ namespace Ecommerce.Order.API.Core.Kafka.Consumer
                 if (productMessage.IsSuccess is false)
                 {
                     var orderDetail = new OrderDetailModel { OrderId = productMessage.OrderId, ProductId = productMessage.ProductId, Units = productMessage.Units };
+                    //throw new Exception();
                     await _context.OrderDetails.AddAsync(orderDetail);
                     await _context.SaveChangesAsync();
                 }

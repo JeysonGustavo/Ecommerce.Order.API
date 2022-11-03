@@ -10,5 +10,7 @@ namespace Ecommerce.Order.API.Core.Kafka.Publisher
         Task PublishUpdateOrderDetailUnits(OrderDetailUpdateUnitsResponseModel updateOrderDetailUnits);
 
         Task PublishDeletedOrderDetail(OrderDetailModel orderDetail);
+
+        Task PublishDeadLetterMessage(string key, string message);
     }
 }
