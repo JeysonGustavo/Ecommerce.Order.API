@@ -20,6 +20,7 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
         private readonly IServiceScope _scope;
         private readonly string _exchange;
         private readonly string _exchangeType;
+        private readonly Dictionary<string, object> _queueArgs;
         private IModel _channel;
         #endregion
 
@@ -35,6 +36,11 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
             _exchangeType = exchangeType;
             _channel = _connectionProvider.GetConnection().CreateModel();
 
+            _queueArgs = new Dictionary<string, object>()
+            {
+                { "x-dead-letter-exchange", "dead_messages_to_monitore_exchange" }
+            };
+
             CreateConnection();
         }
         #endregion
@@ -42,10 +48,21 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
         #region InitializeSubscribers
         public void InitializeSubscribers()
         {
+            InitializeDeadLetter();
+
             SubscriberProductStockChangedOrderDetailCreated();
             SubscriberProductStockChangedOrderDetailUpdated();
             SubscriberProductStockChangedOrderDetailDeleted();
         }
+        #endregion
+
+        #region InitializeDeadLetter
+        private void InitializeDeadLetter()
+        {
+            _channel.ExchangeDeclare("dead_messages_to_monitore_exchange", ExchangeType.Fanout, true, false);
+            _channel.QueueDeclare("dead_messages_to_monitore_queue", true, false, false, null);
+            _channel.QueueBind("dead_messages_to_monitore_queue", "dead_messages_to_monitore_exchange", "");
+        } 
         #endregion
 
         #region CreateConnection
@@ -77,13 +94,13 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
         #region SubscriberProductStockChangedOrderDetailCreated
         private void SubscriberProductStockChangedOrderDetailCreated()
         {
-            var queueName = _channel.QueueDeclare().QueueName;
+            var queueName = _channel.QueueDeclare("product_stock_changed_order_detail_created_queue", false, false, false, _queueArgs).QueueName;
             _channel.QueueBind(queueName, _exchange, "product_stock_changed_order_detail_created");
 
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += ProductStockChangedOrderDetailCreatedMessageReceived;
 
-            _channel.BasicConsume(queueName, true, consumer);
+            _channel.BasicConsume(queueName, false, consumer);
         }
         #endregion
 
@@ -106,12 +123,16 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
                     if (orderDetail is null)
                         throw new ArgumentException("Could not receive the message from Product service");
 
+                    //throw new Exception();
                     _context.OrderDetails.Remove(orderDetail);
                     _context.SaveChanges();
                 }
+                
+                _channel.BasicAck(args.DeliveryTag, false);
             }
             catch (Exception ex)
             {
+                _channel.BasicNack(args.DeliveryTag, false, false);
                 Console.WriteLine($"--> Exception receiving product stock changed for order created message, Error: {ex.Message}");
             }
         }
@@ -120,13 +141,13 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
         #region SubscriberProductStockChangedOrderDetailUpdated
         private void SubscriberProductStockChangedOrderDetailUpdated()
         {
-            var queueName = _channel.QueueDeclare().QueueName;
+            var queueName = _channel.QueueDeclare("product_stock_changed_order_detail_updated_queue", false, false, false, _queueArgs).QueueName;
             _channel.QueueBind(queueName, _exchange, "product_stock_changed_order_detail_updated");
 
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += ProductStockChangedOrderDetailUpdatedMessageReceived;
 
-            _channel.BasicConsume(queueName, true, consumer);
+            _channel.BasicConsume(queueName, false, consumer);
         }
         #endregion
 
@@ -150,12 +171,16 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
                         throw new ArgumentException("Could not receive the message from Product service");
 
                     orderDetail.Units = productMessage.Units;
+                    //throw new Exception();
                     _context.Entry(orderDetail).State = EntityState.Modified;
                     _context.SaveChanges();
                 }
+
+                _channel.BasicAck(args.DeliveryTag, false);
             }
             catch (Exception ex)
             {
+                _channel.BasicNack(args.DeliveryTag, false, false);
                 Console.WriteLine($"--> Exception receiving product stock changed for order updated message, Error: {ex.Message}");
             }
         }
@@ -164,13 +189,13 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
         #region SubscriberProductStockChangedOrderDetailDeleted
         private void SubscriberProductStockChangedOrderDetailDeleted()
         {
-            var queueName = _channel.QueueDeclare().QueueName;
+            var queueName = _channel.QueueDeclare("product_stock_changed_order_detail_deleted_queue", false, false, false, _queueArgs).QueueName;
             _channel.QueueBind(queueName, _exchange, "product_stock_changed_order_detail_deleted");
 
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += ProductStockChangedOrderDetailDeletedMessageReceived;
 
-            _channel.BasicConsume(queueName, true, consumer);
+            _channel.BasicConsume(queueName, false, consumer);
         }
         #endregion
 
@@ -191,12 +216,16 @@ namespace Ecommerce.Order.API.Core.EventBus.Subscriber
                     Console.WriteLine($"--> Product Available Stock was not changed; Product Id: {productMessage.ProductId}; Order Id: {productMessage.OrderId}; Qtde: {productMessage.Units}");
 
                     var orderDetail = new OrderDetailModel { OrderId = productMessage.OrderId, ProductId = productMessage.ProductId, Units = productMessage.Units };
+                    //throw new Exception();
                     _context.OrderDetails.Add(orderDetail);
                     _context.SaveChanges();
                 }
+
+                _channel.BasicAck(args.DeliveryTag, false);
             }
             catch (Exception ex)
             {
+                _channel.BasicNack(args.DeliveryTag, false, false);
                 Console.WriteLine($"--> Exception receiving product stock changed for order deleted message, Error: {ex.Message}");
             }
         } 
