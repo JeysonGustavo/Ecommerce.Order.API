@@ -7,14 +7,14 @@ namespace Ecommerce.Order.API.Core.Listener
     public class ProductStockChangedListener : IHostedService
     {
         #region Properties
-        private readonly ISubscriber _subscribe;
+        //private readonly ISubscriber _subscribe;
         private readonly IKafkaConsumer _kafkaConsumer;
         #endregion
 
         #region Constructor
-        public ProductStockChangedListener(ISubscriber subscribe, IKafkaConsumer kafkaConsumer)
+        public ProductStockChangedListener(IKafkaConsumer kafkaConsumer)
         {
-            _subscribe = subscribe;
+            //_subscribe = subscribe;
             _kafkaConsumer = kafkaConsumer;
         }
         #endregion
@@ -24,7 +24,7 @@ namespace Ecommerce.Order.API.Core.Listener
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            _subscribe.InitializeSubscribers();
+            //_subscribe.InitializeSubscribers();
             _kafkaConsumer.InitializeConsumers();
 
             return Task.CompletedTask;

@@ -12,16 +12,16 @@ namespace Ecommerce.Order.API.Core.Manager
     {
         #region Properties
         private readonly IOrderDAL _orderDAL;
-        private readonly IPublisher _publisher;
+        //private readonly IPublisher _publisher;
         private readonly IMapper _mapper;
         private readonly IKafkaProducer _kafkaProducer;
         #endregion
 
         #region Constructor
-        public OrderManager(IOrderDAL orderDAL, IPublisher publisher, IMapper mapper, IKafkaProducer kafkaProducer)
+        public OrderManager(IOrderDAL orderDAL, IMapper mapper, IKafkaProducer kafkaProducer)
         {
             _orderDAL = orderDAL;
-            _publisher = publisher;
+            //_publisher = publisher;
             _mapper = mapper;
             _kafkaProducer = kafkaProducer;
         }
